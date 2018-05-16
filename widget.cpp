@@ -164,7 +164,14 @@ void Widget::drawPieceHightlight(QPainter *painter)
 
 void Widget::mousePressEvent(QMouseEvent* event)
 {
-    emit setHighlights( event->pos() );
+    if(!isMoveable)
+    {
+        emit setHighlights( event->pos() );
+    }
+    else
+    {
+        emit setMove(event->pos() );
+    }
 }
 
 void Widget::initBoard()
@@ -283,6 +290,41 @@ void Widget::setHighlights(QPoint clickedPoint)
 
     qDebug() << "curPieceX " << curPieceX;
     qDebug() << "curPieceY " << curPieceY;
+    isMoveable = false;
+    if( data(curPieceX, curPieceY) == PieceB)
+    {
+        isMoveable = true;
+        if( (curPieceX-1) >= 0 && (curPieceY+1 < BoardHeight) && (data(curPieceX-1, curPieceY + 1) == Empty) )
+        {
+             int x = (curPieceX-1) ;
+             int y = (curPieceY+1) ;
+             setMoveType(x,y, validMove);
+        }
+        if( (curPieceX+1) < BoardWidth && (curPieceY + 1 < BoardHeight) && (data(curPieceX+1, curPieceY + 1) == Empty) )
+        {
+            int x = (curPieceX+1);
+            int y =  (curPieceY+1);
+            setMoveType(x, y, validMove);
+        }
+    }
+
+    if( data(curPieceX, curPieceY) == PieceW)
+    {
+        isMoveable = true;
+        if( (curPieceX-1) >= 0 && (curPieceY-1 >= 0) && (data(curPieceX-1, curPieceY - 1) == Empty) )
+        {
+             int x = (curPieceX-1);
+             int y = (curPieceY-1);
+             setMoveType(x, y, validMove);
+        }
+        if( (curPieceX+1) < BoardWidth && (curPieceY - 1 >= 0) && (data(curPieceX+1, curPieceY - 1) == Empty) )
+        {
+            int x = (curPieceX+1);
+            int y =  (curPieceY-1) ;
+            setMoveType(x, y, validMove);
+        }
+
+    }
 
     update();
 }
@@ -290,4 +332,47 @@ void Widget::setHighlights(QPoint clickedPoint)
 void Widget::createConnections()
 {
     connect(this, SIGNAL(pieceClicked(QPoint)), this, SLOT(setHighlights(QPoint)));
+}
+
+PossibleMove Widget::getMoveType(int x, int y)
+{
+    return moveType[x][y];
+}
+
+void Widget::setMoveType(int x, int y, PossibleMove p)
+{
+    moveType[x][y] = p;
+}
+
+void Widget::resetMoveType()
+{
+    for(int r = 0 ; r < BoardWidth; r++)
+        for(int c = 0; c < BoardHeight; c++)
+        {
+            moveType[r][c] = invalidMove;
+        }
+}
+
+void Widget::setMove(QPoint clickedPoint)
+{
+    if( (clickedPoint.x() < rowRankWidth()) || (clickedPoint.y() < columnRankHeight()) )
+    {
+        return;
+    }
+    int X = ( clickedPoint.x()-rowRankWidth() ) / squareWidth()  ;
+    int Y = ( clickedPoint.y() - columnRankHeight() )/ (squareHeight());
+    if(curPieceX >= BoardWidth || curPieceY >= BoardHeight)
+    {
+        return;
+    }
+    if( data(X, Y) == Empty &&  getMoveType(X,Y) == validMove )
+    {
+        move(curPieceX, curPieceY, X, Y);
+        curPieceX = X;
+        curPieceY = Y;
+        resetMoveType();
+    }
+
+    isMoveable = false;
+    update();
 }

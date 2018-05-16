@@ -6,7 +6,7 @@
 
 
 enum Piece{Empty, PieceW, PieceB };
-enum Hightlight{EmptyHightLight, PossibleRoad, CurrentPiece};
+enum PossibleMove{invalidMove, validMove};
 
 class Widget : public QWidget
 {
@@ -38,6 +38,7 @@ private:
     void drawCorners(QPainter* painter);
     enum {BoardWidth = 8, BoardHeight = 8};
     Piece board[BoardWidth][BoardHeight];
+    PossibleMove moveType[BoardWidth][BoardHeight];
 
     int curPieceX;
     int curPieceY;
@@ -46,6 +47,11 @@ private:
 
     Piece data(int x, int y);
     void setData(int x, int y, Piece data);
+
+    PossibleMove getMoveType(int x, int y);
+    void setMoveType(int x, int y, PossibleMove p);
+    void resetMoveType();
+
     void initBoard();
     void drawPieces(QPainter *painter);
     void move(int fromX,int fromY, int toX, int toY);
@@ -58,6 +64,7 @@ signals:
 
 private slots:
     void setHighlights(QPoint);
+    void setMove(QPoint);
 };
 
 #endif // WIDGET_H
