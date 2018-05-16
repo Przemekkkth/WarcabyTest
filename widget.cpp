@@ -108,6 +108,7 @@ void Widget::drawPieceHightlight(QPainter *painter)
         int width = squareWidth();
         int height = squareHeight();
         painter->drawRect(QRect(x, y, width, height));
+
         if( (curPieceX-1) >= 0 && (curPieceY+1 < BoardHeight) && (data(curPieceX-1, curPieceY + 1) == Empty) )
         {
              color.setRgb(200, 0, 0, 128);
@@ -138,6 +139,7 @@ void Widget::drawPieceHightlight(QPainter *painter)
         int width = squareWidth();
         int height = squareHeight();
         painter->drawRect(x, y, width, height);
+
         if( (curPieceX-1) >= 0 && (curPieceY-1 >= 0) && (data(curPieceX-1, curPieceY - 1) == Empty) )
         {
              color.setRgb(200, 0, 0, 128);
@@ -276,6 +278,7 @@ void Widget::drawCorners(QPainter* painter)
 
 void Widget::setHighlights(QPoint clickedPoint)
 {
+
     if( (clickedPoint.x() < rowRankWidth()) || (clickedPoint.y() < columnRankHeight()) )
     {
         return;
@@ -288,8 +291,7 @@ void Widget::setHighlights(QPoint clickedPoint)
     }
     curPiece = data(curPieceX, curPieceY);
 
-    qDebug() << "curPieceX " << curPieceX;
-    qDebug() << "curPieceY " << curPieceY;
+
     isMoveable = false;
     if( data(curPieceX, curPieceY) == PieceB)
     {
@@ -361,18 +363,30 @@ void Widget::setMove(QPoint clickedPoint)
     }
     int X = ( clickedPoint.x()-rowRankWidth() ) / squareWidth()  ;
     int Y = ( clickedPoint.y() - columnRankHeight() )/ (squareHeight());
-    if(curPieceX >= BoardWidth || curPieceY >= BoardHeight)
+    if(X >= BoardWidth || X >= BoardHeight)
     {
         return;
     }
+    if(data(X, Y) == PieceW || data(X, Y) == PieceB || (data(X, Y) == Empty &&  getMoveType(X,Y) == invalidMove))
+    {
+        curPieceX = X;
+        curPieceY = Y;
+        curPiece = data(curPieceX, curPieceY);
+        isMoveable = false;
+        update();
+        return;
+    }
+
     if( data(X, Y) == Empty &&  getMoveType(X,Y) == validMove )
     {
         move(curPieceX, curPieceY, X, Y);
-        curPieceX = X;
-        curPieceY = Y;
+        curPieceX = -1;
+        curPieceY = -1;
+        curPiece = data(curPieceX, curPieceY);
         resetMoveType();
+        isMoveable = false;
     }
 
-    isMoveable = false;
+
     update();
 }
