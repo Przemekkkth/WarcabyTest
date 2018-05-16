@@ -1,0 +1,50 @@
+#include "widget.h"
+#include <QPaintEvent>
+#include <QPainter>
+#include <QDebug>
+Widget::Widget(QWidget *parent)
+    : QWidget(parent)
+{
+    setMinimumSize(500,500);
+}
+
+Widget::~Widget()
+{
+
+}
+
+void Widget::paintEvent(QPaintEvent *)
+{
+    QPainter painter(this);
+    for( int h = 1 ; h <= 2 ; ++h )
+    {
+        for( int w = 1 ; w <= BoardWidth ; ++w )
+        {
+            QColor color;
+
+            if ( (h * w) % 2)
+            {
+                color.setRgb(238, 221, 187);
+            }
+            else
+            {
+                color.setRgb(204,136, 68);
+            }
+            painter.setBrush(color);
+            painter.drawRect( (w-1) * squareWidth(),
+                             (h-1) * squareHeight(),
+                             squareWidth(),
+                             squareHeight());
+        }
+    }
+}
+
+QSize Widget::sizeHint()
+{
+    return QSize(500, 500);
+}
+
+QSize Widget::minimumSize()
+{
+    return QSize(500, 500);
+}
