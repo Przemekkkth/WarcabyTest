@@ -6,7 +6,7 @@
 
 
 enum Piece{Empty, PieceW, PieceB };
-enum PossibleMove{invalidMove, validMove};
+enum PossibleMove{invalidMove, validMove, possibleEnemy};
 
 class Widget : public QWidget
 {
@@ -59,6 +59,9 @@ private:
     bool isMoveable;
 
     void createConnections();
+
+    /***to delete ***/
+    void debugMovePiece();
 signals:
     void pieceClicked(QPoint);
 

@@ -109,7 +109,7 @@ void Widget::drawPieceHightlight(QPainter *painter)
         int height = squareHeight();
         painter->drawRect(QRect(x, y, width, height));
 
-        if( (curPieceX-1) >= 0 && (curPieceY+1 < BoardHeight) && (data(curPieceX-1, curPieceY + 1) == Empty) )
+        if( (curPieceX-1) >= 0 && (curPieceY+1 < BoardHeight) /* && (data(curPieceX-1, curPieceY + 1) == Empty)*/ )
         {
              color.setRgb(200, 0, 0, 128);
              painter->setBrush(color);
@@ -119,7 +119,7 @@ void Widget::drawPieceHightlight(QPainter *painter)
              int height = squareHeight();
              painter->drawRect( QRect(x, y, width, height) );
         }
-        if( (curPieceX+1) < BoardWidth && (curPieceY + 1 < BoardHeight) && (data(curPieceX+1, curPieceY + 1) == Empty) )
+        if( (curPieceX+1) < BoardWidth && (curPieceY + 1 < BoardHeight) /*&& (data(curPieceX+1, curPieceY + 1) == Empty)*/ )
         {
             color.setRgb(200, 0, 0, 128);
             painter->setBrush(color);
@@ -278,34 +278,49 @@ void Widget::drawCorners(QPainter* painter)
 
 void Widget::setHighlights(QPoint clickedPoint)
 {
-
+    //check position clicked point. If pos is out of board's square then return
     if( (clickedPoint.x() < rowRankWidth()) || (clickedPoint.y() < columnRankHeight()) )
     {
         return;
     }
+
+    //curPieceX/Y are number of square from left to right and top to bottom
     curPieceX = ( clickedPoint.x()-rowRankWidth() ) / squareWidth()  ;
     curPieceY = ( clickedPoint.y() - columnRankHeight() )/ (squareHeight());
+
+    //check position clicked point. If pos is out of board's square then return
     if(curPieceX >= BoardWidth || curPieceY >= BoardHeight)
     {
         return;
     }
     curPiece = data(curPieceX, curPieceY);
 
-
+    //flag to move
     isMoveable = false;
     if( data(curPieceX, curPieceY) == PieceB)
     {
         isMoveable = true;
-        if( (curPieceX-1) >= 0 && (curPieceY+1 < BoardHeight) && (data(curPieceX-1, curPieceY + 1) == Empty) )
+        //check range
+        if( ( (curPieceX-1) >= 0 && (curPieceY+1 < BoardHeight) && (data(curPieceX-1, curPieceY + 1) == Empty) )
+                ||
+          ( (data(curPieceX-1, curPieceY + 1) == PieceW) && (data(curPieceX-1, curPieceY + 1) != PieceB)  ))
         {
              int x = (curPieceX-1) ;
              int y = (curPieceY+1) ;
+
+             if(board[x][y] == PieceW){
+
+             }
+
              setMoveType(x,y, validMove);
         }
         if( (curPieceX+1) < BoardWidth && (curPieceY + 1 < BoardHeight) && (data(curPieceX+1, curPieceY + 1) == Empty) )
         {
             int x = (curPieceX+1);
             int y =  (curPieceY+1);
+            if(board[x][y] == PieceW){
+
+            }
             setMoveType(x, y, validMove);
         }
     }
@@ -317,17 +332,24 @@ void Widget::setHighlights(QPoint clickedPoint)
         {
              int x = (curPieceX-1);
              int y = (curPieceY-1);
+             if(board[x][y] == PieceB){
+
+             }
              setMoveType(x, y, validMove);
         }
         if( (curPieceX+1) < BoardWidth && (curPieceY - 1 >= 0) && (data(curPieceX+1, curPieceY - 1) == Empty) )
         {
             int x = (curPieceX+1);
             int y =  (curPieceY-1) ;
+            if(board[x][y] == PieceB){
+
+            }
             setMoveType(x, y, validMove);
         }
 
     }
 
+    debugMovePiece();
     update();
 }
 
@@ -367,7 +389,8 @@ void Widget::setMove(QPoint clickedPoint)
     {
         return;
     }
-    if(data(X, Y) == PieceW || data(X, Y) == PieceB || (data(X, Y) == Empty &&  getMoveType(X,Y) == invalidMove))
+
+    if( /*data(X, Y) == PieceW || data(X, Y) == PieceB ||*/ (data(X, Y) == Empty &&  getMoveType(X,Y) == invalidMove))
     {
         curPieceX = X;
         curPieceY = Y;
@@ -388,5 +411,25 @@ void Widget::setMove(QPoint clickedPoint)
     }
 
 
+
     update();
+}
+
+void Widget::debugMovePiece()
+{
+    for(int i = 0; i < BoardWidth; i++)
+        for(int j = 0; j < BoardHeight; j++)
+        {
+            qDebug() << "x " << i << " y " << j;
+            if(getMoveType(i,j) == invalidMove)
+            {
+                qDebug() << "invalidMove";
+            }
+            else if(getMoveType(i,j) == validMove)
+            {
+                qDebug() << "validMove";
+            }
+
+
+        }
 }
